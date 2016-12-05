@@ -1,0 +1,177 @@
+<div class="page" ng-init="$ctrl.ngOnInit()" ng-class="{ hide: !$ctrl.llamaLoadingIndicator.disabled('async') && !$ctrl.llamaLoadingIndicator.disabled('image-loaded') }">
+
+    <!-- Desktop menu -->
+    <div ng-if="!$ctrl.onMobile()" id="floor-menu-desktop" class="floor-menu-desktop">
+        <div class="floor-link" ng-repeat="(pageId, floor) in $ctrl.floor.data.pages" ng-click="$ctrl.switchFloor(pageId)">
+            <div class="floor-element floor-up" ng-mouseover="$ctrl.handleEventPageMouseOver($event, pageId)" ng-mouseleave="$ctrl.handleEventPageMouseLeave($event, pageId)">
+                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                    width="66px" viewBox="0 0 96.895 29" enable-background="new 0 0 96.895 29" xml:space="preserve">
+                    <polygon ng-if="$ctrl.floor.current !== pageId" fill="{{ $ctrl.state.pageHover === pageId ? $ctrl.floor.data.template.config.colors.pageListHoverColor.color : $ctrl.floor.data.template.config.colors.pageListColor.color }}" points="96.895,14.5 48.448,29 -0.001,14.5 -0.001,14.5 -0.001,14.5 48.448,0 96.895,14.5 "/>
+                    <polygon ng-if="$ctrl.floor.current === pageId" fill="{{ $ctrl.floor.data.template.config.colors.pageListActiveColor.color }}" points="96.895,14.5 48.448,29 -0.001,14.5 -0.001,14.5 -0.001,14.5 48.448,0 96.895,14.5 "/>
+                </svg>
+                <div class="floor-text">{{ floor.nameCustom }}</div>
+            </div>          
+        </div>
+    </div>
+
+    <!-- Mobile menu -->
+    <div ng-if="$ctrl.onMobile()" class="floor-menu-mobile">
+        <div class="mobile-vetical">
+            <img src="assets/images/phone.svg">
+            <div class="text">Vend telefonen for<br>mere information</div>           
+        </div>
+        <div class="menu-button dropdown" ng-click="$ctrl.mobileMenu($event)">
+            <img src="assets/images/menu-button.svg" />
+            <div class="dropdown-content">                
+                <a ng-repeat="(pageId, floor) in $ctrl.floor.data.pages" ng-click="$ctrl.switchFloor(pageId)" ng-class="{ 'floor-active-a': $ctrl.floor.current === pageId }">{{ floor.nameCustom }}</a>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+
+    <!-- Swiper -->
+    <swiper re-init="$ctrl.state.rebuildSlide" override-parameters="$ctrl.primarySwiperOpts" class="primary-slider scroll-bar" ng-style="$ctrl.style.primarySwiper">
+        <slides>
+            <slide ng-repeat="(hotspotId, hotspot) in $ctrl._defaultFloor.hotspots" class="swiper-lazy" data-background="{{ hotspot.__material.file }}" data-swiper-slide-index="{{ $index }}">
+                <llama-img on-load="$ctrl.primarySwiperImageEventLoading()" on-error="$ctrl.primarySwiperImageEventLoading()" ng-src="{{ hotspot.__material.file }}" class="image-loaded invisible"></llama-img>
+            </slide>
+        </slides>
+        <div class="navigation-button">
+            <div class="button-prev" ng-style="$ctrl.style.arrow.prev" 
+            ng-mouseup="$ctrl.handleEventArrowMouseUp($event, 'prev')" 
+            ng-mousedown="$ctrl.handleEventArrowMouseDown($event, 'prev')" 
+            ng-mouseenter="$ctrl.handleEventArrowMouseEnter($event, 'prev')" 
+            ng-mouseleave="$ctrl.handleEventArrowMouseLeave($event, 'prev')" 
+            ng-click="$ctrl.primarySwiperPrev($event)"><i class="fa fa-caret-left"></i></div>
+            
+            <div class="button-next" ng-style="$ctrl.style.arrow.next" 
+            ng-mouseup="$ctrl.handleEventArrowMouseUp($event, 'next')" 
+            ng-mousedown="$ctrl.handleEventArrowMouseDown($event, 'next')" 
+            ng-mouseenter="$ctrl.handleEventArrowMouseEnter($event, 'next')" 
+            ng-mouseleave="$ctrl.handleEventArrowMouseLeave($event, 'next')" 
+            ng-click="$ctrl.primarySwiperNext($event)"><i class="fa fa-caret-right"></i></div>                
+        </div>
+        <div class="image-loader" ng-class="{ hide: $ctrl.llamaLoadingIndicator.disabled('image-loaded') }"></div>
+    </swiper>
+    <!-- End Swiper -->
+    
+    <!-- Floor -->
+    <div ng-if="!$ctrl.onMobile()" class="floor-background" ng-class="{ 'background-opacity': $ctrl.state.showFloorImageBackground, hide: !$ctrl.state.showCollapseButtonOnDesktop }" ng-click="$ctrl.floorImageBackgroundCollapseButtonOnDesktop($event)"></div>
+    <div ng-mouseover="$ctrl.state.enableQnA = false" id="floor-image" class="floor-image" ng-style="$ctrl.style.floorImageBackground" ng-class="{ opacity50: $ctrl.state.enableHighlightFloorMode, opacity100: $ctrl.onMobile() && $ctrl.state.turnOnHighlight, 'background-opacity': $ctrl.state.showFloorImageBackground }">
+        <div class="contain-image">
+            <!-- Floor Image -->
+            <llama-img ng-class="{ hide: !$ctrl.state.showFloorImageBackground }" on-load="$ctrl.floorImageBackgroundEventLoading()" on-error="$ctrl.floorImageBackgroundEventLoading()" class="floor-design" ng-src="{{ $ctrl._defaultFloor.backgroundCrop }}"></llama-img>
+
+            <!-- Hotspots -->
+            <div ng-class="{ hide: !$ctrl.state.showFloorImageBackground }" class="list-elements">                    
+                <div id="list-hotspots" class="list-releative">                        
+                    <llama-floor-hotspot 
+                        class="icon-marker" 
+                        ng-repeat="(hotspotId, hotspot) in $ctrl._defaultFloor.hotspots" 
+                        hotspot="hotspot" 
+                        options="$ctrl.hotspotOpts" 
+                        rebuild="$ctrl.state.rebuildHotspot" 
+                        order="$index" 
+                        hovered="$ctrl.state.currentHotspotHover" 
+                        actived="$ctrl.state.currentHotspotActive"
+                        on-click="$ctrl.handleEventIconClick($index)"  
+                     >
+                     </llama-floor-hotspot>
+                </div>
+            </div> 
+        </div>
+
+        <!-- Buttons -->
+        <div ng-if="!$ctrl.onMobile()" >            
+            <div ng-if="!$ctrl.state.showCollapseButtonOnDesktop" class="show-desktop-button cursor-pointer" ng-class="{ hide: $ctrl.state.showFloorImageBackground }" ng-click="$ctrl.toggleButtonFloorImageBackgroundOnDesktop($event, true)">
+            </div>
+            <div ng-if="!$ctrl.state.showCollapseButtonOnDesktop" class="hide-desktop-button cursor-pointer" ng-class="{ hide: !$ctrl.state.showFloorImageBackground }" ng-click="$ctrl.toggleButtonFloorImageBackgroundOnDesktop($event, false)">
+            </div>
+            <div ng-if="!$ctrl.state.showCollapseButtonOnDesktop" class="explan-desktop-button cursor-pointer" ng-class="{ hide: !$ctrl.state.showFloorImageBackground }" ng-click="$ctrl.floorImageBackgroundExpandButtonOnDesktop($event)">
+            </div>
+            <div ng-if="$ctrl.state.showCollapseButtonOnDesktop" class="collapse-desktop-button cursor-pointer" ng-class="{ hide: !$ctrl.state.showFloorImageBackground }" ng-click="$ctrl.floorImageBackgroundCollapseButtonOnDesktop($event)">
+                <div class="text">minimer<br>plantegning</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Second slide -->
+    <div class="second-slider" ng-style="$ctrl.style.secondSwiper">
+        <swiper re-init="$ctrl.state.rebuildSlide" override-parameters="$ctrl.secondSwiperOpts" ng-style="$ctrl.style.secondSwiper">
+            <slides>
+                <slide ng-repeat="(hotspotId, hotspot) in $ctrl._defaultFloor.hotspots" class="swiper-lazy" data-background="{{ hotspot.__material.file }}" data-swiper-slide-index="{{ $index }}">
+                    <llama-img on-load="$ctrl.secondSwiperImageEventLoading()" on-error="$ctrl.secondSwiperImageEventLoading()" ng-src="{{ hotspot.__material.file }}" class="image-loaded invisible"></llama-img>
+                </slide>
+            </slides>
+        </swiper>
+        <div class="blur-thumbnail-div"></div>
+    </div>
+
+    <!--  floor button on Mobile -->
+    <div ng-if="$ctrl.onMobile()" class="show-mobile-button cursor-pointer" ng-click="$ctrl.toggleButtonFloorImageBackgroundOnOnMobile($event, true)" ng-class="{ hide: $ctrl.state.showFloorImageBackground }">
+    </div>
+    
+    <div ng-if="$ctrl.onMobile()" class="hide-mobile-button cursor-pointer" ng-click="$ctrl.toggleButtonFloorImageBackgroundOnOnMobile($event, false)" ng-class="{ hide: !$ctrl.state.showFloorImageBackground }">
+    </div>
+
+    <!-- Guide list -->
+    <div ng-if="!$ctrl.state.showCollapseButtonOnDesktop" class="guide-list" ng-class="{ hide: !$ctrl.state.enableQnA }">
+        <ul>
+            <li>
+                <div class="guide-icon">
+                    <span class="icon camera" ng-style="{ 'background-color': $ctrl.floor.data.template.config.colors.hotspotActiveColor.color }"></span> Aktiv kameravinkel 
+                </div>
+            </li>
+            <li>
+                <div class="guide-icon">
+                    <span class="icon camera" ng-style="{ 'background-color': $ctrl.floor.data.template.config.colors.hotspotColor.color }"></span> Før musen over <br>    Gør dette kamera aktivt
+                </div>
+            </li>
+            <li class="hide-mobile">
+                <div class="guide-icon">
+                    <span class="icon expand"></span> Gør plantegning større
+                </div>
+            </li>
+            <li class="hide-mobile">
+                <div class="guide-icon">
+                    <span class="icon collapse"></span> Gør plantegning mindre
+                </div>
+            </li>
+            <li>
+                <div class="guide-icon">
+                    <span class="icon menu-close"></span> Åbn plantegning
+                </div>
+            </li>
+            <li class="hide-mobile">
+                <div class="guide-icon">
+                    <span class="icon">
+                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                            width="100%" viewBox="-1.744 33 100.383 87" enable-background="new -1.744 33 100.383 87"
+                            xml:space="preserve">
+                            <polygon fill="{{ $ctrl.floor.data.template.config.colors.pageListColor.color }}" points="96.895,105.5 48.448,120 -0.001,105.5 -0.001,105.5 -0.001,105.5 48.448,91 "/>
+                            <polygon fill="{{ $ctrl.floor.data.template.config.colors.pageListHoverColor.color }}" points="96.895,76.5 48.448,91 -0.001,76.5 -0.001,76.5 -0.001,76.5 48.448,62 "/>
+                            <polygon fill="{{ $ctrl.floor.data.template.config.colors.pageListActiveColor.color }}" points="96.895,47.5 48.448,62 -0.001,47.5 -0.001,47.5 -0.001,47.5 48.448,33 "/>
+                        </svg>    
+                    </span> Etage vælger
+                </div>
+            </li>
+            <li>
+                <div class="guide-icon">
+                    <span class="icon faq"></span> Guide
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div ng-if="!$ctrl.state.showCollapseButtonOnDesktop && !$ctrl.state.enableHighlightFloorMode" class="floor-button-faq cursor-pointer" ng-click="$ctrl.toggleFAQButton($event)">
+    </div>
+    <div ng-if="$ctrl.state.enableHighlightFloorMode" class="turn-on-highlight-mobile-button cursor-pointer" ng-click="$ctrl.toggleFloorImageBackgroundHighlight($event)" ng-class="{ hide: $ctrl.state.turnOnHighlight }" />
+    </div>
+    <div ng-if="$ctrl.state.enableHighlightFloorMode" class="turn-off-highlight-mobile-button cursor-pointer" ng-click="$ctrl.toggleFloorImageBackgroundHighlight($event)" ng-class="{ hide: !$ctrl.state.turnOnHighlight }">
+    </div>
+    <div class="logo-image">
+        <llama-img ng-src="{{ $ctrl.floor.data.template.config.logo.logo_url }}" on-load="$ctrl.logoEventLoading()" on-error="$ctrl.logoEventLoading()"></llama-img>
+    </div>
+</div>
+
+<!-- Loading indicator -->
+<div class="page-loading" ng-class="{ hide: $ctrl.llamaLoadingIndicator.disabled('async') }"></div>
